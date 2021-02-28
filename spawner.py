@@ -19,14 +19,23 @@ class EnemySpawner:
     @staticmethod
     def surrounding_boxes(taken_box: BoundingRect, bounds: BoundingRect) -> list[BoundingRect]:
         surrounding_boxes = []
-        if (new_box := BoundingRect(bounds.x1, bounds.y1, bounds.x2, taken_box.y1)) != BoundingRect(0, 0, 0, 0):
-            surrounding_boxes.append(new_box)
-        if (new_box := BoundingRect(bounds.x1, bounds.y1, taken_box.x1, bounds.y2)) != BoundingRect(0, 0, 0, 0):
-            surrounding_boxes.append(new_box)
-        if (new_box := BoundingRect(bounds.x1, taken_box.y2, bounds.x2, bounds.y2)) != BoundingRect(0, 0, 0, 0):
-            surrounding_boxes.append(new_box)
-        if (new_box := BoundingRect(taken_box.x2, bounds.y1, bounds.x2, bounds.y2)) != BoundingRect(0, 0, 0, 0):
-            surrounding_boxes.append(new_box)
+
+        top_box = BoundingRect(bounds.x1, bounds.y1, bounds.x2, taken_box.y1)
+        if top_box.width != 0 and top_box.height != 0:
+            surrounding_boxes.append(top_box)
+
+        left_box = BoundingRect(bounds.x1, bounds.y1, taken_box.x1, bounds.y2)
+        if left_box.width != 0 and left_box.height != 0:
+            surrounding_boxes.append(left_box)
+
+        bottom_box = BoundingRect(bounds.x1, taken_box.y2, bounds.x2, bounds.y2)
+        if bottom_box.width != 0 and bottom_box.height != 0:
+            surrounding_boxes.append(bottom_box)
+
+        right_box = BoundingRect(taken_box.x2, bounds.y1, bounds.x2, bounds.y2)
+        if right_box.width != 0 and right_box.height != 0:
+            surrounding_boxes.append(right_box)
+
         return surrounding_boxes
 
     @classmethod
@@ -180,27 +189,66 @@ class EnemySpawner:
         return Pentagon(self.canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, color=color)
 
     def random_hexagon(self, bounds, color):
+        logging.debug("random_pentagon()")
+
         minX = bounds.x1
         maxX = bounds.x2
         minY = bounds.y1
         maxY = bounds.y2
+
         x1 = randrange(minX, maxX)
+        logging.debug(f"x1: {x1}")
+        assert minX <= x1 <= maxX
+
         y1 = randrange(minY, maxY)
-        x2 = x1 - randrange(maxX - x1)
-        y2 = y1 + randrange(maxY - y1)
-        x3 = x2 + randrange(maxX - x2)
-        y3 = y2 + randrange(maxY - y2)
-        x4 = x3 + randrange(maxX - x3)
-        y4 = y3 + randrange(maxY - y3)
-        x5 = x4 + randrange(maxX - x4)
-        y5 = y4 - randrange(maxY - y4)
-        x6 = x5 + randrange(maxX - x5)
-        y6 = y5 - randrange(maxY - y5)
+        logging.debug(f"y1: {y1}")
+        assert minY <= y1 <= maxY
+
+        x2 = randrange(minX, x1)
+        logging.debug(f"x2: {x2}")
+        assert minX <= x2 <= maxX
+
+        y2 = randrange(y1, maxY)
+        logging.debug(f"y2: {y2}")
+        assert minY <= y2 <= maxY
+
+        x3 = randrange(minX, x2)
+        logging.debug(f"x3: {x3}")
+        assert minX <= x3 <= maxX
+
+        y3 = randrange(y2, maxY)
+        logging.debug(f"y3: {y3}")
+        assert minY <= y3 <= maxY
+
+        x4 = randrange(x3, maxX)
+        logging.debug(f"x4: {x4}")
+        assert minX <= x4 <= maxX
+
+        y4 = randrange(y3, maxY)
+        logging.debug(f"y4: {y4}")
+        assert minY <= y4 <= maxY
+
+        x5 = randrange(x4, maxX)
+        logging.debug(f"x5: {x5}")
+        assert minX <= x5 <= maxX
+
+        y5 = randrange(y2, y4)
+        logging.debug(f"y5: {y5}")
+        assert minY <= y5 <= maxY
+
+        x6 = randrange(x4, maxX)
+        logging.debug(f"x6: {x6}")
+        assert minX <= x6 <= maxX
+
+        y6 = randrange(y1, y5)
+        logging.debug(f"y6: {y6}")
+        assert minY <= y6 <= maxY
+
         return Hexagon(self.canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, color=color)
 
     def random_shape(self, bounds):
         logging.debug(f"random_shape(bounds={bounds})")
-        shape = random.randrange(3)
+        shape = random.randrange(4)
         color = random.choice(self.sprite_colors)
 
         result = None

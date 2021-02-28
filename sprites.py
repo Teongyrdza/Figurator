@@ -94,12 +94,20 @@ class PlayerSprite(Sprite):
         # Motion bindings
         canvas.bind_all('<Key-Left>', self.move_left)
         canvas.bind_all('<Key-Right>', self.move_right)
+        canvas.bind_all('<Key-Up>', self.move_up)
+        canvas.bind_all('<Key-Down>', self.move_down)
 
     def move_left(self, event):
-        self.canvas.move(self.id, -10, 0)
+        self.move(-10, 0)
 
     def move_right(self, event):
-        self.canvas.move(self.id, 10, 0)
+        self.move(10, 0)
+
+    def move_up(self, event):
+        self.move(0, -10)
+
+    def move_down(self, event):
+        self.move(0, 10)
 
 
 """
