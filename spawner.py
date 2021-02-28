@@ -189,7 +189,7 @@ class EnemySpawner:
         return Pentagon(self.canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, color=color)
 
     def random_hexagon(self, bounds, color):
-        logging.debug("random_pentagon()")
+        logging.debug("random_hexagon()")
 
         minX = bounds.x1
         maxX = bounds.x2
@@ -246,9 +246,35 @@ class EnemySpawner:
 
         return Hexagon(self.canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, color=color)
 
+    def random_circle(self, bounds, color):
+        logging.debug("random_circle()")
+
+        minX = bounds.x1
+        maxX = bounds.x2
+        minY = bounds.y1
+        maxY = bounds.y2
+
+        x1 = randrange(minX, maxX)
+        logging.debug(f"x1: {x1}")
+        assert minX <= x1 <= maxX
+
+        y1 = randrange(minY, maxY)
+        logging.debug(f"y1: {y1}")
+        assert minY <= y1 <= maxY
+
+        x2 = randrange(x1, maxX)
+        logging.debug(f"x2: {x2}")
+        assert minX <= x2 <= maxX
+
+        y2 = randrange(y1, maxY)
+        logging.debug(f"y2: {y2}")
+        assert minY <= y2 <= maxY
+
+        return Circle(self.canvas, x1, y1, x2, y2, color=color)
+
     def random_shape(self, bounds):
         logging.debug(f"random_shape(bounds={bounds})")
-        shape = random.randrange(4)
+        shape = random.randrange(5)
         color = random.choice(self.sprite_colors)
 
         result = None
@@ -261,6 +287,8 @@ class EnemySpawner:
             result = self.random_pentagon(bounds, color)
         elif shape == 3:
             result = self.random_hexagon(bounds, color)
+        elif shape == 4:
+            result = self.random_circle(bounds, color)
 
         logging.debug(f"random_shape returns {result} with bounding rect {result.coords}")
 
