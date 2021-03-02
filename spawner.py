@@ -44,6 +44,10 @@ class EnemySpawner:
 
         logging.debug(f"free_box(searched_boxes={searched_boxes}, search_bounds={search_bounds})")
 
+        searched_boxes = [
+            box if search_bounds.contains(box) else box.chopped(bounds=search_bounds) for box in searched_boxes
+        ]
+
         if not searched_boxes:
             return search_bounds
 
@@ -54,10 +58,7 @@ class EnemySpawner:
         for i in range(box_count):
             if i == box_index:
                 new_bounds = surrounding_boxes[i]
-                new_boxes = [
-                    box if new_bounds.contains(box) else box.chopped(bounds=new_bounds)
-                    for box in searched_boxes if within(new_bounds, box)
-                ]
+                new_boxes = [box for box in searched_boxes if within(box, new_bounds)]
                 return cls.free_box(searched_boxes=new_boxes, search_bounds=new_bounds)
 
         return BoundingRect(0, 0, 0, 0)
@@ -276,6 +277,7 @@ class EnemySpawner:
         logging.debug(f"random_shape(bounds={bounds})")
         shape = random.randrange(5)
         color = random.choice(self.sprite_colors)
+        bounds = BoundingRect(int(bounds.x1), int(bounds.y1), int(bounds.x2), int(bounds.y2))
 
         result = None
 
@@ -290,19 +292,25 @@ class EnemySpawner:
         elif shape == 4:
             result = self.random_circle(bounds, color)
 
-        logging.debug(f"random_shape returns {result} with bounding rect {result.coords}")
+        logging.debug(f"random_shape returns {result} with bounding rect {result.coords} and id {result.id}")
 
         return result
 
     def __init__(self, bounds: BoundingRect, sprite_colors: list[str], canvas: Canvas):
-        self.taken_boxes = []
+        self.enemies = []
         self.bounds = bounds
         self.sprite_colors = sprite_colors
         self.canvas = canvas
 
+    @property
+    def taken_boxes(self) -> list[BoundingRect]:
+        return [enemy.coords for enemy in self.enemies]
+
     def spawn_enemy(self):
         enemy_bounds = self.__class__.free_box(self.taken_boxes, self.bounds)
         new_enemy = self.random_shape(enemy_bounds)
+        """ 
         if new_enemy.coords.width != 0 and new_enemy.coords.height != 0:
             self.taken_boxes.append(new_enemy.coords)
+        """
         return new_enemy
