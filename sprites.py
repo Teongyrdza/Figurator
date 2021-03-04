@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image, ImageTk
 from rect import *
+from point import *
 from math import sin, cos, pi
 import logging
 
@@ -13,6 +14,9 @@ class Sprite:
         self.id = None
         if DEBUG:
             self.text_id = None
+
+    def __del__(self):
+        self.canvas.delete(self.id)
 
     def move(self, x, y):
         self.canvas.move(self.id, x, y)
@@ -57,25 +61,6 @@ class Sprite:
 
     @property
     def coords(self) -> BoundingRect:
-        xy = self.canvas.coords(self.id)
-        return BoundingRect(xy[0], xy[1], xy[2], xy[3])
-
-    @coords.setter
-    def coords(self, new_coords):
-        adj_x = new_coords.x1 - self.coords.x1
-        adj_y = new_coords.y1 - self.coords.y1
-        self.move(adj_x, adj_y)
-
-
-class Polygon(Sprite):
-    def __init__(self, canvas, *points, color="black"):
-        super().__init__(canvas)
-        self.num_sides = len(points) // 2
-        self.id = canvas.create_polygon(points, fill=color)
-        self.draw_id()
-
-    @property
-    def coords(self) -> BoundingRect:
         points = self.canvas.coords(self.id)
         x_points = points[0::2]
         y_points = points[1::2]
@@ -84,6 +69,128 @@ class Polygon(Sprite):
         x2 = max(x_points)
         y2 = max(y_points)
         return BoundingRect(x1, y1, x2, y2)
+
+    @coords.setter
+    def coords(self, new_coords):
+        adj_x = new_coords.x1 - self.coords.x1
+        adj_y = new_coords.y1 - self.coords.y1
+        self.move(adj_x, adj_y)
+
+    @property
+    def points(self) -> list[Point]:
+        points = self.canvas.coords(self.id)
+        x_points = points[0::2]
+        y_points = points[1::2]
+        return list(map(lambda x, y: Point(x, y), x_points, y_points))
+
+
+@collided.add
+def collided(s1: Sprite, s2: Sprite) -> bool:
+    return collided_left(s1, s2) or collided_right(s1, s2) or collided_top(s1, s2) or collided_bottom(s1, s2)
+
+
+@collided_left.add
+def collided_left(s1: Sprite, s2: Sprite) -> bool:
+    if not collided_left(s1.coords, s2.coords):
+        return False
+
+    left_points = s2.points
+    right_points = s1.points
+    rightest = max(left_points, key=lambda p: p.x)  # Rightest point that collides with s1
+    collided_points = [point for point in right_points if
+                       point.x < rightest.x]  # Points that possibly collide with rightest
+
+    if not collided_points:
+        return False
+
+    highest_collided = min(collided_points, key=lambda p: p.y)
+    lowest_collided = max(collided_points, key=lambda p: p.y)
+
+    if not highest_collided.y <= rightest.y <= lowest_collided.y:
+        return False
+
+    return True
+
+
+@collided_right.add
+def collided_right(s1: Sprite, s2: Sprite) -> bool:
+    if not collided_right(s1.coords, s2.coords):
+        return False
+
+    left_points = s1.points
+    right_points = s2.points
+    rightest = max(left_points, key=lambda p: p.x)  # Rightest point that collides with s2
+    collided_points = [point for point in right_points if
+                       point.x < rightest.x]  # Points that possibly collide with rightest
+
+    if not collided_points:
+        return False
+
+    highest_collided = min(collided_points, key=lambda p: p.y)
+    lowest_collided = max(collided_points, key=lambda p: p.y)
+
+    if not highest_collided.y <= rightest.y <= lowest_collided.y:
+        return False
+
+    return True
+
+
+@collided_top.add
+def collided_top(s1: Sprite, s2: Sprite) -> bool:
+    if not collided_top(s1.coords, s2.coords):
+        return False
+
+    top_points = s2.points
+    bottom_points = s1.points
+    highest = max(bottom_points, key=lambda p: p.y)  # Highest point that collides with s2
+    collided_points = [point for point in top_points if
+                       point.y < highest.y]  # Points that possibly collide with highest
+
+    if not collided_points:
+        return False
+
+    leftmost_collided = min(collided_points, key=lambda p: p.x)
+    rightest_collided = max(collided_points, key=lambda p: p.x)
+
+    if not leftmost_collided.x <= highest.x <= rightest_collided.x:
+        return False
+
+    return True
+
+
+@collided_bottom.add
+def collided_bottom(s1: Sprite, s2: Sprite) -> bool:
+    if not collided_bottom(s1.coords, s2.coords):
+        return False
+
+    top_points = s1.points
+    bottom_points = s2.points
+    highest = max(bottom_points, key=lambda p: p.y)  # Highest point that collides with s1
+    collided_points = [point for point in top_points if
+                       point.y < highest.y]  # Points that possibly collide with highest
+
+    if not collided_points:
+        return False
+
+    leftmost_collided = min(collided_points, key=lambda p: p.x)
+    rightest_collided = max(collided_points, key=lambda p: p.x)
+
+    if not leftmost_collided.x <= highest.x <= rightest_collided.x:
+        return False
+
+    return True
+
+
+class Polygon(Sprite):
+    def __init__(self, canvas, *points, color="black"):
+        super().__init__(canvas)
+        self.num_sides = len(points) // 2
+
+        logging.debug(f"Creating a polygon with {self.num_sides} sides")
+        assert len(points) % 2 == 0
+
+        self.id = canvas.create_polygon(points, fill=color)
+        self.draw_id()
 
 
 class Triangle(Polygon):
@@ -106,6 +213,13 @@ class Hexagon(Polygon):
         super().__init__(canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, color=color)
 
 
+class Star(Polygon):
+    def __init__(self, canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8, x9, y9, x10, y10,
+                 color="black"):
+        super().__init__(canvas, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8, x9, y9, x10, y10,
+                         color=color)
+
+
 class Circle(Sprite):
     def __init__(self, canvas, x1, y1, x2, y2, color="black"):
         super().__init__(canvas)
@@ -113,15 +227,27 @@ class Circle(Sprite):
         self.draw_id()
 
 
-class PlayerSprite(Sprite):
+class PlayerSprite(Star):
     move_amount = 20
 
     def __init__(self, canvas):
-        super().__init__(canvas)
-        # Star image creation
-        self.image = ImageTk.PhotoImage(Image.open("./sprite.png"))
-        self.id = canvas.create_image(720, 400, image=self.image)
-        self.draw_id()
+        cx, cy = 720, 400
+        radius = 300
+        offset = radius / 4
+        super().__init__(
+            canvas,
+            cx, cy - radius,
+                cx - offset, cy - offset,
+                cx - radius, cy - offset,
+                cx - offset, cy,
+                cx - offset * 2, cy + radius,
+            cx, cy + offset,
+                cx + offset * 2, cy + radius,
+                cx + offset, cy,
+                cx + radius, cy - offset,
+                cx + offset, cy - offset,
+            color="#fb0"
+        )
 
         # Motion bindings
         canvas.bind_all('<Key-Left>', self.move_left)
@@ -129,13 +255,6 @@ class PlayerSprite(Sprite):
         canvas.bind_all('<Key-Up>', self.move_up)
         canvas.bind_all('<Key-Down>', self.move_down)
         canvas.bind_all('<Return>', self.hide)
-
-    @property
-    def coords(self) -> BoundingRect:
-        xy = self.canvas.coords(self.id)
-        cx, cy = xy[0], xy[1]
-        width, height = self.image.width(), self.image.height()
-        return BoundingRect(cx - width / 2, cy - height / 2, cx + width / 2, cy + height / 2)
 
     def move_left(self, event):
         move_amount = self.__class__.move_amount
@@ -159,27 +278,27 @@ class PlayerSprite(Sprite):
         logging.debug("Player Sprite is hiding")
 
         window_height = self.canvas.master.winfo_height()
-        new_coords = BoundingRect(self.coords.x1, self.coords.y1 + window_height, self.coords.x2, self.coords.y2 + window_height)
+        new_coords = BoundingRect(self.coords.x1, self.coords.y1 + window_height, self.coords.x2,
+                                  self.coords.y2 + window_height)
         self.coords = new_coords
 
 
-"""
-tk = Tk()
-canvas = Canvas(tk, width=1435, height=765)
-canvas.pack()
+if __name__ == "__main__":
+    tk = Tk()
+    canvas = Canvas(tk, width=1435, height=765)
+    canvas.pack()
 
-circle = Circle(canvas, 10, 10, 200, 200, color="brown")
-print(f"Circle's bounding rect is {circle.coords}")
+    circle = Circle(canvas, 10, 10, 200, 200, color="brown")
+    print(f"Circle's bounding rect is {circle.coords}")
 
-triangle = Triangle(canvas, 300, 200, 300, 400, 500, 300, color="green")
-print(f"Triangle's bounding rect is {triangle.coords}")
+    triangle = Triangle(canvas, 300, 200, 300, 400, 500, 300, color="green")
+    print(f"Triangle's bounding rect is {triangle.coords}")
 
-rect = Rect(canvas, 300, 500, 300, 600, 700, 600, 700, 500, color="yellow")
-print(f"Rectangle's bounding rect is {rect.coords}")
+    rect = Rect(canvas, 300, 500, 300, 600, 700, 600, 700, 500, color="yellow")
+    print(f"Rectangle's bounding rect is {rect.coords}")
 
-pentagon = Pentagon(canvas, 900, 400, 750, 600, 850, 800, 950, 800, 1050, 600, color="purple")
-print(f"Pentagon's bounding rect is  {pentagon.coords}")
+    pentagon = Pentagon(canvas, 900, 400, 750, 600, 850, 800, 950, 800, 1050, 600, color="purple")
+    print(f"Pentagon's bounding rect is  {pentagon.coords}")
 
-hexagon = Hexagon(canvas, 1000, 20, 850, 220, 850, 420, 1000, 620, 1150, 420, 1150, 220,  color="pink")
-print(f"Hexagon's bounding rect is  {hexagon.coords}")
-"""
+    hexagon = Hexagon(canvas, 1000, 20, 850, 220, 850, 420, 1000, 620, 1150, 420, 1150, 220, color="pink")
+    print(f"Hexagon's bounding rect is  {hexagon.coords}")
