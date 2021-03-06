@@ -237,15 +237,15 @@ class PlayerSprite(Star):
         super().__init__(
             canvas,
             cx, cy - radius,
-                cx - offset, cy - offset,
-                cx - radius, cy - offset,
-                cx - offset, cy,
-                cx - offset * 2, cy + radius,
+            cx - offset, cy - offset,
+            cx - radius, cy - offset,
+            cx - offset, cy,
+            cx - offset * 2, cy + radius,
             cx, cy + offset,
-                cx + offset * 2, cy + radius,
-                cx + offset, cy,
-                cx + radius, cy - offset,
-                cx + offset, cy - offset,
+            cx + offset * 2, cy + radius,
+            cx + offset, cy,
+            cx + radius, cy - offset,
+            cx + offset, cy - offset,
             color="#fb0"
         )
 

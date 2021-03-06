@@ -6,10 +6,12 @@ import logging
 
 
 def randrange(start, stop=None, step=1):
-    if start == 0 and not stop:
-        return 0
-    if (stop - start) == 0:
-        return stop
+    if not stop:
+        if start == 0:
+            return 0
+    else:
+        if (stop - start) == 0:
+            return stop
     return random.randrange(start, stop, step)
 
 
@@ -54,7 +56,7 @@ class EnemySpawner:
         first_box = searched_boxes[0]
         surrounding_boxes = EnemySpawner.surrounding_boxes(first_box, bounds=search_bounds)
         box_count = len(surrounding_boxes)
-        box_index = random.randrange(box_count)
+        box_index = randrange(box_count)
         for i in range(box_count):
             if i == box_index:
                 new_bounds = surrounding_boxes[i]
