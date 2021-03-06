@@ -63,7 +63,10 @@ class Game:
                     new_enemy = self.enemy_spawner.spawn_enemy()
                     if new_enemy.coords.width != 0 or new_enemy.coords.height != 0:
                         self.enemies.append(new_enemy)
-                        self.rotationDict[new_enemy.id] = bool(random.randint(0, 1))  # Select rotated sprites randomly
+                        if isinstance(new_enemy, Circle):
+                            self.rotationDict[new_enemy.id] = True  # Circles should always rotate
+                        else:
+                            self.rotationDict[new_enemy.id] = bool(random.randint(0, 1))  # Select rotated sprites randomly
                         self.timeouts[new_enemy.id] = 0  # The enemy is in the game by default
 
                     # Update timestamp

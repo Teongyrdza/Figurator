@@ -249,12 +249,17 @@ class PlayerSprite(Star):
             color="#fb0"
         )
 
+        self.mouse_x = None
+        self.mouse_y = None
+
         # Motion bindings
         canvas.bind_all('<Key-Left>', self.move_left)
         canvas.bind_all('<Key-Right>', self.move_right)
         canvas.bind_all('<Key-Up>', self.move_up)
         canvas.bind_all('<Key-Down>', self.move_down)
         canvas.bind_all('<Return>', self.hide)
+        canvas.bind_all('<Button-2>', self.hide)
+        canvas.bind_all('<B1-Motion>', self.follow_mouse)
 
     def move_left(self, event):
         move_amount = self.__class__.move_amount
@@ -272,7 +277,7 @@ class PlayerSprite(Star):
         move_amount = self.__class__.move_amount
         self.move(0, move_amount)
 
-    def hide(self):
+    def hide(self, event):
         """Hide the sprite underneath the screen."""
 
         logging.debug("Player Sprite is hiding")
@@ -281,6 +286,14 @@ class PlayerSprite(Star):
         new_coords = BoundingRect(self.coords.x1, self.coords.y1 + window_height, self.coords.x2,
                                   self.coords.y2 + window_height)
         self.coords = new_coords
+
+    def follow_mouse(self, event):
+        if self.mouse_x and self.mouse_y:
+            ratio = 1
+            adj_x = event.x - self.mouse_x
+            adj_y = event.y - self.mouse_y
+            self.move(adj_x * ratio, adj_y * ratio)
+        self.mouse_x, self.mouse_y = event.x, event.y
 
 
 if __name__ == "__main__":
