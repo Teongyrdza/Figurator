@@ -176,7 +176,7 @@ class Game:
                 bd=0,
                 command=resume_game
             )
-            resume_button.place(x=text_x + 2, y=text_y + 40, anchor=CENTER)
+            resume_button.place(x=text_x + 2, y=text_y + 53, anchor=CENTER)
 
     def reset(self):
         logging.debug("Game is reset")
