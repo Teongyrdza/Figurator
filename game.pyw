@@ -144,9 +144,14 @@ class Game:
 
         # Create game over text
         text_x, text_y = self.window_width / 2, self.window_height / 2
-        gameover_text = self.canvas.create_text(text_x, text_y, fill="black", font="System 40", text="Game Over!")
+        # Times font looks better on Windows
+        if platform.system() == "Darwin":
+            gameover_text = self.canvas.create_text(text_x, text_y, fill="black", font="System 40", text="Game Over!")
+        else:
+            gameover_text = self.canvas.create_text(text_x, text_y, fill="black", font="Times 40", text="Game Over!")
 
         # Create resume button
+        # Same as with text
         if platform.system() == "Darwin":
             resume_button = Button(
                 self.canvas,
@@ -164,7 +169,7 @@ class Game:
             resume_button = Button(
                 self.canvas,
                 text="Click to resume",
-                font="System 20",
+                font="Times 20",
                 bg="red",
                 fg="black",
                 relief=FLAT,
