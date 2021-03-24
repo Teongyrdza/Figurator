@@ -5,6 +5,7 @@ from CanvasPlus import CanvasPlus
 from sprites import *
 from rect import *
 from spawner import EnemySpawner
+from FPSLogger import FPSLogger
 import logging
 import platform
 
@@ -41,6 +42,7 @@ class Game:
         self.timeouts = None  # Timeouts for every sprite, if any
         self.timeout = 10
         self.enemySpawnTime = None
+        self.fpsLogger = None
         self.running = False
         self.reset()
 
@@ -56,6 +58,8 @@ class Game:
                 ratio = elapsed / expected  # Update timestep
                 logging.debug(f"{elapsed:.2f} seconds elapsed from the last update, the expected is {expected: .2f}")
                 logging.debug(f"The ratio is {ratio: .2f}")
+                self.fpsLogger.updateTime()
+                self.fpsLogger.logFPS()
 
                 # Spawn enemy every second
                 if time.time() - self.enemySpawnTime >= 1:
@@ -177,11 +181,12 @@ class Game:
         self.rotationDict = {}
         self.timeouts = {}
         self.enemySpawnTime = time.time()
+        self.fpsLogger = FPSLogger()
         self.running = True
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     handlers=[logging.FileHandler("log.txt"), logging.StreamHandler()]
 )
 game = Game()
