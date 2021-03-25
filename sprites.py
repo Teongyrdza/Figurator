@@ -1,10 +1,10 @@
 from tkinter import *
-from PIL import Image, ImageTk
 from rect import *
 from point import *
 from math import sin, cos, pi
 import logging
 
+# TODO: Transition Sprite.coords to use Canvas.bbox()
 DEBUG = False
 
 
