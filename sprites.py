@@ -38,11 +38,15 @@ class Sprite:
         pass
 
     def move(self, x, y):
+        logging.debug(f"Moving sprite {self.id} by x: {x:.2f}, y: {x:.2f} pixels")
+
         self.canvas.move(self.id, x, y)
         if DEBUG:
             self.canvas.move(self.text_id, x, y)
 
     def rotate(self, degrees):
+        logging.debug(f"Rotating sprite {self.id} by {degrees:.2f} degrees")
+
         radians = degrees / 180 * pi
         """
         hypot = self.coords.width / 2
@@ -77,6 +81,10 @@ class Sprite:
                 font="System 20",
                 text=f"{self.id}"
             )
+
+    @property
+    def screen(self) -> BoundingRect:
+        return BoundingRect(0, 0, self.canvas.master.winfo_width(), self.canvas.master.winfo_height())
 
     @property
     def coords(self) -> BoundingRect:
@@ -215,14 +223,12 @@ class Polygon(Sprite):
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
             movement = self.movement * random_double(self.minMovement, self.maxMovement) * ratio
-            logging.debug(f"Moving enemy down by {movement: .2f} pixels")
             self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
             # Only small polygons should rotate
-            if self.coords.width < self.canvas.master.winfo_width() and self.coords.height < self.canvas.master.winfo_height():
+            if self.coords.width < self.screen.width and self.coords.height < self.screen.height:
                 rotation = self.rotation * random_double(self.minRotation, self.maxRotation) * ratio
-                logging.debug(f"Rotating enemy by {rotation: .2f} degrees")
                 self.rotate(rotation)
 
 
@@ -263,14 +269,11 @@ class Circle(Sprite):
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
             movement = self.movement * random_double(self.minMovement, self.maxMovement) * ratio
-            logging.debug(f"Moving enemy down by {movement: .2f} pixels")
             self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
-            # Ellipses don`t rotate
-            if self.coords.width == self.coords.height:
+            if self.coords.width == self.coords.height: # Ellipses don`t rotate
                 rotation = self.rotation * random_double(self.minRotation, self.maxRotation) * ratio
-                logging.debug(f"Rotating enemy by {rotation: .2f} degrees")
                 self.rotate(rotation)
 
 
@@ -329,7 +332,7 @@ class PlayerSprite(Star):
 
         logging.debug("Player Sprite is hiding")
 
-        window_height = self.canvas.master.winfo_height()
+        window_height = self.screen.height
         new_coords = BoundingRect(self.coords.x1, self.coords.y1 + window_height, self.coords.x2,
                                   self.coords.y2 + window_height)
         self.coords = new_coords
