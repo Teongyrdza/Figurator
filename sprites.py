@@ -18,6 +18,8 @@ class Sprite:
 
     def __del__(self):
         self.canvas.delete(self.id)
+        if DEBUG:
+            self.canvas.delete(self.text_id)
 
     def move(self, x, y):
         self.canvas.move(self.id, x, y)
