@@ -115,7 +115,7 @@ class Game:
 
                 # Check for game over
                 for enemy in self.enemies:
-                    if self.timeouts[enemy.id] == 0:  # Enemy in game
+                    if not self.timeouts[enemy.id]:  # Enemy in game
                         if collided(enemy, self.player):
                             self.playerLives -= 1
                             self.timeouts[enemy.id] = self.timeout  # This enemy takes a break
