@@ -299,20 +299,14 @@ class EnemySpawner:
         return result
 
     def __init__(self, bounds: BoundingRect, sprite_colors: list[str], canvas: Canvas):
-        self.enemies = []
+        self.taken_boxes = {}
         self.bounds = bounds
         self.sprite_colors = sprite_colors
         self.canvas = canvas
 
-    @property
-    def taken_boxes(self) -> list[BoundingRect]:
-        return [enemy.coords for enemy in self.enemies]
-
     def spawn_enemy(self):
-        enemy_bounds = self.__class__.free_box(self.taken_boxes, self.bounds)
+        enemy_bounds = self.__class__.free_box(list(self.taken_boxes.values()), self.bounds)
         new_enemy = self.random_shape(enemy_bounds)
-        """ 
         if new_enemy.coords.width != 0 and new_enemy.coords.height != 0:
-            self.taken_boxes.append(new_enemy.coords)
-        """
+            self.taken_boxes[new_enemy.id] = new_enemy.coords
         return new_enemy

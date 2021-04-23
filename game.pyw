@@ -27,7 +27,7 @@ class Game:
         self.screen = BoundingRect(0, 0, self.window_width, self.window_height)
         self.player = PlayerSprite(self.canvas)
         self.playerLives = None
-        self.enemies = None
+        self.enemies = {}
         self.enemy_spawner = EnemySpawner(
             bounds=BoundingRect(0, 0, self.window_width, self.window_height / 4),
             sprite_colors=sprite_colors,
@@ -63,7 +63,7 @@ class Game:
                     logging.debug("Game spawns new enemy")
                     new_enemy = self.enemy_spawner.spawn_enemy()
                     if new_enemy.coords.width != 0 or new_enemy.coords.height != 0:
-                        self.enemies.append(new_enemy)
+                        self.enemies[new_enemy.id] = new_enemy
                         if isinstance(new_enemy, Circle):
                             # Circles should always rotate
                             new_enemy.config(self.enemyMovement, 0.5, 1.5, self.enemyRotation, 0.5, 1.5)
@@ -78,38 +78,36 @@ class Game:
                 # Move enemies around
                 logging.debug("Game moving enemies")
 
-                enemiesToDelete = []  # Indices of enemies to delete
+                enemiesToDelete = []  # IDs of enemies to delete
 
-                for i in range(len(self.enemies)):
-                    enemy = self.enemies[i]
-
-                    logging.debug(f"Moving {i + 1}th enemy of {len(self.enemies)} with id {enemy.id}")
+                for enemy in self.enemies.values():
+                    logging.debug(f"Moving enemy with id {enemy.id}")
 
                     # And remove ofscreen ones
                     if not within(enemy.coords, self.screen):
-                        enemiesToDelete.append(i)
+                        enemiesToDelete.append(enemy.id)
                         logging.debug(f"Removing enemy with bounds {enemy.coords} and id {enemy.id}")
                         continue
 
                     enemy.act(ratio)
+                    self.enemy_spawner.taken_boxes[enemy.id] = enemy.coords
 
                 # Delete ofscreen enemies
-                self.enemies = [
-                    self.enemies[i] for i in range(len(self.enemies)) if i not in enemiesToDelete
-                ]
+                for enemyToDelete in enemiesToDelete:
+                    del self.enemies[enemyToDelete]
+                    del self.enemy_spawner.taken_boxes[enemyToDelete]
 
                 # Check for game over
-                for enemy in self.enemies:
+                for enemy in self.enemies.values():
                     if not self.timeouts[enemy.id]:  # Enemy in game
                         if collided(enemy, self.player):
                             self.playerLives -= 1
                             self.timeouts[enemy.id] = self.timeout  # This enemy takes a break
                     else:
                         self.timeouts[enemy.id] -= elapsed if elapsed < self.timeout else expected
+
                     if self.playerLives == 0:
                         self.gameOver()
-
-                self.enemy_spawner.enemies = self.enemies  # Update spawner enemies
 
             self.tk.update_idletasks()
             self.tk.update()
@@ -167,7 +165,7 @@ class Game:
         logging.debug("Game is reset")
 
         self.playerLives = 5
-        self.enemies = []
+        self.enemies = {}
         self.rotationDict = {}
         self.timeouts = {}
         self.enemySpawnTime = time.time()
