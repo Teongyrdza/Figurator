@@ -9,11 +9,12 @@ DEBUG = False
 
 
 class Sprite:
-    def __init__(self, canvas):
+    def __init__(self, canvas, id):
         self.canvas = canvas
-        self.id = None
+        self.id = id
         if DEBUG:
             self.text_id = None
+            self.draw_id()
 
     def __del__(self):
         self.canvas.delete(self.id)
@@ -183,14 +184,15 @@ def collided_bottom(s1: Sprite, s2: Sprite) -> bool:
 
 class Polygon(Sprite):
     def __init__(self, canvas, *points, color="black"):
-        super().__init__(canvas)
         self.num_sides = len(points) // 2
 
         logging.debug(f"Creating a polygon with {self.num_sides} sides")
         assert len(points) % 2 == 0
 
-        self.id = canvas.create_polygon(points, fill=color)
-        self.draw_id()
+        super().__init__(
+            canvas,
+            canvas.create_polygon(points, fill=color)
+        )
 
 
 class Triangle(Polygon):
@@ -222,9 +224,10 @@ class Star(Polygon):
 
 class Circle(Sprite):
     def __init__(self, canvas, x1, y1, x2, y2, color="black"):
-        super().__init__(canvas)
-        self.id = canvas.create_arc(x1, y1, x2, y2, extent=359.9, style=PIESLICE, fill=color, outline=color)
-        self.draw_id()
+        super().__init__(
+            canvas,
+            canvas.create_arc(x1, y1, x2, y2, extent=359.9, style=PIESLICE, fill=color, outline=color)
+        )
 
 
 class PlayerSprite(Star):
