@@ -214,7 +214,7 @@ class Polygon(Sprite):
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
             movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
-            self.move(movement, 0)
+            self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
             # Only small polygons should rotate
@@ -260,7 +260,7 @@ class Circle(Sprite):
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
             movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
-            self.move(movement, 0)
+            self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
             # Ellipses don`t rotate
