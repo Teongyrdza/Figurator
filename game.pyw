@@ -96,7 +96,7 @@ class Game:
                     logging.debug(f"Moving enemy down by {enemyMovement: .2f} pixels")
                     enemy.move(0, enemyMovement)
 
-                    # Move enemy if it is a small polygon or an equiertal circle
+                    # Rotate enemy if it is a small polygon or an equiertal circle
                     rotateEnemy = \
                         ((isinstance(enemy,
                                      Polygon) and enemy.coords.width <= self.screen.height and enemy.coords.height <= self.screen.height)

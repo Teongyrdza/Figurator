@@ -16,10 +16,21 @@ class Sprite:
             self.text_id = None
             self.draw_id()
 
+        self.movement = self.minMovement = self.maxMovement = None
+        self.rotation = self.minRotation = self.maxRotation = None
+
     def __del__(self):
         self.canvas.delete(self.id)
         if DEBUG:
             self.canvas.delete(self.text_id)
+
+    def config(self, movement, minMovement, maxMovement, rotation, minRotation, maxRotation):
+        self.movement = movement
+        self.minMovement = minMovement
+        self.maxMovement = maxMovement
+        self.rotation = rotation
+        self.minRotation = minRotation
+        self.maxRotation = maxRotation
 
     def move(self, x, y):
         self.canvas.move(self.id, x, y)
