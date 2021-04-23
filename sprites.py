@@ -3,6 +3,7 @@ from rect import *
 from point import *
 from math import sin, cos, pi
 import logging
+import random
 
 # TODO: Transition Sprite.coords to use Canvas.bbox()
 DEBUG = False
@@ -31,6 +32,9 @@ class Sprite:
         self.rotation = rotation
         self.minRotation = minRotation
         self.maxRotation = maxRotation
+
+    def act(self, ratio: float):
+        pass
 
     def move(self, x, y):
         self.canvas.move(self.id, x, y)
@@ -207,6 +211,17 @@ class Polygon(Sprite):
             canvas.create_polygon(points, fill=color)
         )
 
+    def act(self, ratio: float):
+        if self.movement and self.minMovement and self.maxMovement:
+            movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
+            self.move(movement, 0)
+
+        if self.rotation and self.minRotation and self.maxRotation:
+            # Only small polygons should rotate
+            if self.coords.width < self.canvas.master.winfo_width and self.coords.height < self.canvas.master.winfo_height:
+                rotation = self.rotation * random.randrange(self.minRotation, self.maxRotation) * ratio
+                self.rotate(rotation)
+
 
 class Triangle(Polygon):
     def __init__(self, canvas, x1, y1, x2, y2, x3, y3, color="black"):
@@ -242,6 +257,17 @@ class Circle(Sprite):
             canvas.create_arc(x1, y1, x2, y2, extent=359.9, style=PIESLICE, fill=color, outline=color)
         )
 
+    def act(self, ratio: float):
+        if self.movement and self.minMovement and self.maxMovement:
+            movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
+            self.move(movement, 0)
+
+        if self.rotation and self.minRotation and self.maxRotation:
+            # Ellipses don`t rotate
+            if self.coords.width == self.coords.height:
+                rotation = self.rotation * random.randrange(self.minRotation, self.maxRotation) * ratio
+                self.rotate(rotation)
+
 
 class PlayerSprite(Star):
     move_amount = 20
@@ -253,15 +279,15 @@ class PlayerSprite(Star):
         super().__init__(
             canvas,
             cx, cy - radius,
-            cx - offset, cy - offset,
-            cx - radius, cy - offset,
-            cx - offset, cy,
-            cx - offset * 2, cy + radius,
+                cx - offset, cy - offset,
+                cx - radius, cy - offset,
+                cx - offset, cy,
+                cx - offset * 2, cy + radius,
             cx, cy + offset,
-            cx + offset * 2, cy + radius,
-            cx + offset, cy,
-            cx + radius, cy - offset,
-            cx + offset, cy - offset,
+                cx + offset * 2, cy + radius,
+                cx + offset, cy,
+                cx + radius, cy - offset,
+                cx + offset, cy - offset,
             color="#fb0"
         )
 
