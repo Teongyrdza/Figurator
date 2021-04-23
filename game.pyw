@@ -6,14 +6,11 @@ from sprites import *
 from rect import *
 from spawner import EnemySpawner
 from FPSLogger import FPSLogger
+from utils import random_double
 import logging
 import platform
 
 sprite_colors = ['red', 'green', 'blue', 'yellow', 'brown', 'pink', 'cyan', 'magenta', 'black']
-
-
-def random_double(start, stop):
-    return start + random.random() * stop
 
 
 class Game:
@@ -68,9 +65,11 @@ class Game:
                     if new_enemy.coords.width != 0 or new_enemy.coords.height != 0:
                         self.enemies.append(new_enemy)
                         if isinstance(new_enemy, Circle):
-                            self.rotationDict[new_enemy.id] = True  # Circles should always rotate
+                            # Circles should always rotate
+                            new_enemy.config(self.enemyMovement, 0.5, 1.5, self.enemyRotation, 0.5, 1.5)
                         else:
-                            self.rotationDict[new_enemy.id] = bool(random.randint(0, 1))  # Select rotated sprites randomly
+                            # Select rotated sprites randomly
+                            new_enemy.config(self.enemyMovement, 0.5, 1.5, self.enemyRotation * random.randint(0, 1), 0.5, 1.5)
                         self.timeouts[new_enemy.id] = 0  # The enemy is in the game by default
 
                     # Update timestamp
@@ -92,21 +91,7 @@ class Game:
                         logging.debug(f"Removing enemy with bounds {enemy.coords} and id {enemy.id}")
                         continue
 
-                    enemyMovement = self.enemyMovement * random_double(0.5, 1.5) * ratio
-                    logging.debug(f"Moving enemy down by {enemyMovement: .2f} pixels")
-                    enemy.move(0, enemyMovement)
-
-                    # Rotate enemy if it is a small polygon or an equiertal circle
-                    rotateEnemy = \
-                        ((isinstance(enemy,
-                                     Polygon) and enemy.coords.width <= self.screen.height and enemy.coords.height <= self.screen.height)
-                         or (isinstance(enemy, Circle) and enemy.coords.width == enemy.coords.height)) and \
-                        self.rotationDict[enemy.id]
-
-                    if rotateEnemy:
-                        enemyRotation = self.enemyRotation * random_double(0.5, 1.5) * ratio
-                        logging.debug(f"Rotating enemy by {enemyRotation: .2f} degrees")
-                        enemy.rotate(enemyRotation)
+                    enemy.act(ratio)
 
                 # Delete ofscreen enemies
                 self.enemies = [

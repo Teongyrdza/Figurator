@@ -2,6 +2,7 @@ from tkinter import *
 from rect import *
 from point import *
 from math import sin, cos, pi
+from utils import random_double
 import logging
 import random
 
@@ -213,13 +214,15 @@ class Polygon(Sprite):
 
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
-            movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
+            movement = self.movement * random_double(self.minMovement, self.maxMovement) * ratio
+            logging.debug(f"Moving enemy down by {movement: .2f} pixels")
             self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
             # Only small polygons should rotate
-            if self.coords.width < self.canvas.master.winfo_width and self.coords.height < self.canvas.master.winfo_height:
-                rotation = self.rotation * random.randrange(self.minRotation, self.maxRotation) * ratio
+            if self.coords.width < self.canvas.master.winfo_width() and self.coords.height < self.canvas.master.winfo_height():
+                rotation = self.rotation * random_double(self.minRotation, self.maxRotation) * ratio
+                logging.debug(f"Rotating enemy by {rotation: .2f} degrees")
                 self.rotate(rotation)
 
 
@@ -259,13 +262,15 @@ class Circle(Sprite):
 
     def act(self, ratio: float):
         if self.movement and self.minMovement and self.maxMovement:
-            movement = self.movement * random.randrange(self.minMovement, self.maxMovement) * ratio
+            movement = self.movement * random_double(self.minMovement, self.maxMovement) * ratio
+            logging.debug(f"Moving enemy down by {movement: .2f} pixels")
             self.move(0, movement)
 
         if self.rotation and self.minRotation and self.maxRotation:
             # Ellipses don`t rotate
             if self.coords.width == self.coords.height:
-                rotation = self.rotation * random.randrange(self.minRotation, self.maxRotation) * ratio
+                rotation = self.rotation * random_double(self.minRotation, self.maxRotation) * ratio
+                logging.debug(f"Rotating enemy by {rotation: .2f} degrees")
                 self.rotate(rotation)
 
 
