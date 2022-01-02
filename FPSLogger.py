@@ -21,5 +21,5 @@ class FPSLogger:
 
     def logFPS(self):
         if self.toLog:
-            logging.info(f"The FPS is {self.lastFPS:.2f}")
+            print(f"FPS: {self.lastFPS:.2f}")
             self.toLog = False

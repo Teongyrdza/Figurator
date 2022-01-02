@@ -9,6 +9,7 @@ from FPSLogger import FPSLogger
 from utils import random_double
 import logging
 import platform
+import sys
 
 sprite_colors = ['red', 'green', 'blue', 'yellow', 'brown', 'pink', 'cyan', 'magenta', 'black']
 
@@ -19,8 +20,8 @@ class Game:
         self.tk.title("Фігуратор")
         self.tk.wm_attributes('-topmost', True)
         self.tk.wm_attributes('-fullscreen', True)
-        self.window_width = self.tk.winfo_screenwidth()
-        self.window_height = self.tk.winfo_screenheight()
+        self.window_width = self.tk.winfo_width()
+        self.window_height = self.tk.winfo_height()
         self.canvas = CanvasPlus(self.tk, width=self.window_width, height=self.window_height, background="white")
         self.canvas.pack()
 
@@ -175,7 +176,7 @@ class Game:
 
 logging.basicConfig(
     level=logging.INFO,
-    handlers=[logging.FileHandler("log.txt"), logging.StreamHandler()]
+    handlers=[logging.FileHandler("log.txt"), logging.StreamHandler(sys.stdout)]
 )
 game = Game()
 game.run()
