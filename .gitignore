@@ -2,4 +2,5 @@
 sprite.png
 .idea/
 __pycache__/
+.venv/
 log.txt
